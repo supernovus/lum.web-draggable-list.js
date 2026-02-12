@@ -1,0 +1,28 @@
+/*
+[draggable] {
+  user-select: none;
+}
+*/
+
+body {
+  font-family: sans-serif;
+}
+
+ul {
+  padding: 0;
+  margin: 1em 0.25em;
+}
+
+ul > li {
+  display: block;
+  background: #f0f0f0;
+  border: solid 1px silver;
+  border-radius: 4px;
+  margin: 0.25em;
+  padding: 0.25em;
+  width: 8em;
+  &.over {
+    border: 2px dashed green;
+  }
+}
+
