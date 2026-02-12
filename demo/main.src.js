@@ -1,21 +1,11 @@
-import { DraggableList, WC } from "../index.js";
+import { ClassyPreset, DraggableList, WC } from "../index.js";
 
 function startDemo() {
   let oldPos = document.getElementById('old-pos');
   let newPos = document.getElementById('new-pos');
-  globalThis.demoList = new DraggableList('ul', {
-
-    onEnter(ev) {
-      ev.target.classList.add('over');
-    },
-
-    onLeave(ev) {
-      ev.target.classList.remove('over');
-    },
-
-    onEnd(ev) {
-      this.listItems.forEach(item => item.classList.remove('over'));
-    },
+  globalThis.demoList = new DraggableList('ul', ClassyPreset, 
+  {
+    dragOverClass: 'over',
 
     onDrop(ev) {
       oldPos.value = ev.oldpos;
