@@ -5,7 +5,9 @@ export {WC};
 export const { indexOf, on } = WC.ez;
 
 const DEF_OPTS = {
-  items: '& > li',
+  delegated: true,
+  itemMatch: 'li',
+  itemSelector: '& > li',
   onDrop() {},
   onEnd() {},
   onEnter() {},
@@ -38,10 +40,23 @@ export class DraggableList {
     this.listElem = listElem;
     this.dragging = null;
     enableDragDropTouch(listElem, listElem, opts);
+
+    if (opts.delegated) {
+      for (let meth of DRAG_METHODS)
+      {
+        let eventName = meth.replace('handle','').toLowerCase();
+        on(listElem, eventName, opts.itemMatch, ev => {
+          if (opts.verbose) { 
+            console.debug('delegated', {eventName, meth, event: ev, opts, list: this});
+          }
+          this[meth](ev);
+        });
+      }
+    }
   }
 
   get listItems() {
-    return this.listElem.querySelectorAll(this.opts.items);
+    return this.listElem.querySelectorAll(this.opts.itemSelector);
   }
 
   makeDraggable(enabled=true, ...elems) {
@@ -49,6 +64,7 @@ export class DraggableList {
       elems = this.listItems;
     }
 
+    let delegated = this.opts.delegated;
     let verbose = this.opts.verbose;
 
     for (let elem of elems) {
@@ -62,21 +78,19 @@ export class DraggableList {
 
       elem.setAttribute('draggable', enabled.toString());
 
-      // Doing this here as delegated events on the list element didn't work.
-      // which is kind of annoying to be honest, but everything about the
-      // drag-and-drop API is. Like having to use a middleware to make it
-      // work with touch screens, how did that get fucked up so badly?
-
-      for (let meth of DRAG_METHODS)
-      {
-        let eventName = meth.replace('handle','').toLowerCase();
-        on(elem, eventName, ev => {
-          if (verbose) { 
-            console.debug({eventName, meth, event: ev, elem, list: this});
-          }
-          this[meth](ev);
-        });
+      if (!delegated) {
+        for (let meth of DRAG_METHODS)
+        {
+          let eventName = meth.replace('handle','').toLowerCase();
+          on(elem, eventName, ev => {
+            if (verbose) { 
+              console.debug('direct', {eventName, meth, event: ev, elem, list: this});
+            }
+            this[meth](ev);
+          });
+        }
       }
+
     }
 
     return this;
