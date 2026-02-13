@@ -5,7 +5,7 @@ import { enableDragDropTouch } from '@dragdroptouch/drag-drop-touch';
 import WC from '@lumjs/web-core';
 import core from '@lumjs/core';
 
-export { WC };
+export { enableDragDropTouch, WC };
 export const { indexOf, on } = WC.ez;
 
 const { isObj } = core.types;
@@ -355,33 +355,31 @@ export default DraggableList;
  * ```js
  * import {DraggableList, ClassyPreset} from '@lumjs/web-draggable-list';
  * 
- * // A test to see if the element is NOT a drop target.
- * const noDrop = event => event.target.classList.has('no-drop');
- * 
  * let dlist = new DraggableList('#my-list', ClassyPreset, {
  *   dragOverClass: 'drop-target',
  *   onEnter(event) {
- *     if (noDrop(event)) return;
+ *     // Run stuff before calling the preset onEnter.
  *     ClassyPreset.onEnter.call(this, event);
- *   },
- *   onDrop(event) {
- *     if (noDrop(event)) return;
- *     myApp.itemDropped(event)
+ *     // Run more stuff after the preset onEnter.
  *   },
  * });
  * ```
- * That example is rather limited, as you'd also want to change the dropEffect
- * in the `onOver()` handler, but anyway, hopefully it gives you an idea.
- * 
- * See `demo/main.src.js` for a more realistic example.
+ *
  */
 export const ClassyPreset = {
   dragOverClass: 'drag-over',
+  onStart() {
+    this.entered = 0;
+  },
   onEnter(ev) {
-    ev.target.classList.add(this.opts.dragOverClass);
+    if (!this.entered++) {
+      ev.target.classList.add(this.opts.dragOverClass);
+    }
   },
   onLeave(ev) {
-    ev.target.classList.remove(this.opts.dragOverClass);
+    if (!--this.entered) {
+      ev.target.classList.remove(this.opts.dragOverClass);
+    }
   },
   onEnd() {
     let doclass = this.opts.dragOverClass;
